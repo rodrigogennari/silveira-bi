@@ -1169,8 +1169,8 @@ async function ghLoadData() {
       rawData = content.rawData;
       filteredData = rawData;
       if (content.metas) metas = content.metas;
-      applyGlobalFilters();
-      renderCurrentPage();
+      populateFilterOptions();
+      applyFilters();
       return true;
     }
   } catch(e) { /* sem dados salvos ainda */ }
