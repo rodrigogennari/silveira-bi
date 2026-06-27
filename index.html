@@ -1066,6 +1066,34 @@ tbody tr:last-child td { border-bottom: none; }
       </div>
 
       <div class="config-section">
+        <h3>☁️ Sincronização GitHub</h3>
+        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:16px">
+          Salva os dados automaticamente no repositório GitHub após cada importação.
+          Na próxima abertura do site, os dados carregam sozinhos em qualquer dispositivo.
+        </p>
+        <div class="config-row">
+          <div>
+            <div class="config-label">Token de acesso</div>
+            <div class="config-desc">Personal Access Token com permissão de escrita no repositório</div>
+          </div>
+          <input class="config-input" id="cfg-gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx" style="width:240px;font-family:monospace" />
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary" onclick="saveGhToken()">💾 Salvar token</button>
+          <button class="btn btn-outline" onclick="ghSaveData()">☁️ Sincronizar agora</button>
+          <span id="gh-status" style="font-size:12px;color:var(--text-2)"></span>
+        </div>
+        <div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--text-2);line-height:1.7">
+          <strong>Como criar o token:</strong><br>
+          1. Acesse <strong>github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens</strong><br>
+          2. Clique em <strong>Generate new token</strong><br>
+          3. Em <strong>Repository access</strong>, selecione apenas <strong>silveira-bi</strong><br>
+          4. Em <strong>Permissions → Contents</strong>, selecione <strong>Read and Write</strong><br>
+          5. Gere e cole o token acima
+        </div>
+      </div>
+
+      <div class="config-section">
         <h3>📥 Importação</h3>
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('upload-input').click()">
           <div class="dz-icon">📂</div>
@@ -1116,6 +1144,70 @@ let filteredData = [];   // after global filters
 let metas = [];          // { consultor, periodo, valor }
 let charts = {};         // Chart.js instances
 let vendas = { page: 1, perPage: 15, sort: null, asc: true };
+
+/* ════════════════════════════════════════════
+   GITHUB SYNC
+════════════════════════════════════════════ */
+const GH_REPO  = 'rodrigogennari/silveira-bi';
+const GH_FILE  = 'data.json';
+
+function ghToken() { return localStorage.getItem('gh_token') || ''; }
+
+async function ghLoadData() {
+  const token = ghToken();
+  if (!token) return false;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) return false;
+    const meta = await res.json();
+    const content = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    if (content.rawData && content.rawData.length) {
+      // Restaurar datas serializadas
+      content.rawData.forEach(r => { if (r._date) r._date = new Date(r._date); });
+      rawData = content.rawData;
+      filteredData = rawData;
+      if (content.metas) metas = content.metas;
+      applyGlobalFilters();
+      renderCurrentPage();
+      return true;
+    }
+  } catch(e) { /* sem dados salvos ainda */ }
+  return false;
+}
+
+async function ghSaveData() {
+  const token = ghToken();
+  if (!token) return;
+  try {
+    // Buscar SHA atual (necessário para update)
+    let sha = '';
+    const check = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (check.ok) { const j = await check.json(); sha = j.sha; }
+
+    const payload = JSON.stringify({ rawData, metas });
+    const encoded = btoa(unescape(encodeURIComponent(payload)));
+    const body = { message: 'Atualizar dados BI', content: encoded };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      showToast('☁️ Dados salvos no GitHub!', 'success');
+    } else {
+      const err = await res.json();
+      showToast('❌ Erro ao salvar: ' + (err.message || res.status), 'error');
+    }
+  } catch(e) {
+    showToast('❌ Erro ao salvar no GitHub: ' + e.message, 'error');
+  }
+}
 
 const FUNNEL_STAGES = ['Prospecção','Qualificação','Proposta','Negociação','Fechamento'];
 Chart.register(ChartDataLabels);
@@ -1274,6 +1366,7 @@ function importFile(file) {
       const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
       processData(json);
       showToast(`✅ ${json.length} registros importados com sucesso!`, 'success');
+      ghSaveData();
     } catch(err) {
       showToast('❌ Erro ao importar planilha: ' + err.message, 'error');
     }
@@ -2086,10 +2179,25 @@ function renderFunil() {
 ════════════════════════════════════════════ */
 function renderConfig() {
   document.getElementById('cfg-dark-toggle').checked = document.documentElement.getAttribute('data-theme') === 'dark';
+  loadGhTokenInput();
 }
 function saveConfig() {
   showToast('✅ Configurações salvas!', 'success');
   if (rawData.length) { processData([]); /* re-map */ }
+}
+
+function saveGhToken() {
+  const t = document.getElementById('cfg-gh-token').value.trim();
+  if (!t) { showToast('⚠️ Informe o token!', 'error'); return; }
+  localStorage.setItem('gh_token', t);
+  document.getElementById('gh-status').textContent = '✅ Token salvo';
+  showToast('✅ Token salvo!', 'success');
+}
+
+function loadGhTokenInput() {
+  const t = ghToken();
+  const el = document.getElementById('cfg-gh-token');
+  if (el && t) { el.value = t; document.getElementById('gh-status').textContent = '✅ Token configurado'; }
 }
 function clearData() {
   if (!confirm('Deseja limpar todos os dados importados?')) return;
@@ -2216,6 +2324,11 @@ function showToast(msg, type='info') {
 ════════════════════════════════════════════ */
 initMetas();
 renderDashboard();
+// Carregar dados do GitHub automaticamente
+(async () => {
+  const loaded = await ghLoadData();
+  if (loaded) showToast('☁️ Dados carregados do GitHub!', 'success');
+})();
 </script>
 </body>
 </html>
