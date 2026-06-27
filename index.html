@@ -1154,17 +1154,12 @@ const GH_FILE  = 'data.json';
 function ghToken() { return localStorage.getItem('gh_token') || ''; }
 
 async function ghLoadData() {
-  const token = ghToken();
-  if (!token) return false;
   try {
-    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`, {
-      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-    });
+    // Leitura pública — não precisa de token (repo público)
+    const res = await fetch(`https://raw.githubusercontent.com/${GH_REPO}/main/${GH_FILE}?t=${Date.now()}`);
     if (!res.ok) return false;
-    const meta = await res.json();
-    const content = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    const content = await res.json();
     if (content.rawData && content.rawData.length) {
-      // Restaurar datas serializadas
       content.rawData.forEach(r => { if (r._date) r._date = new Date(r._date); });
       rawData = content.rawData;
       filteredData = rawData;
