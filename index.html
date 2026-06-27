@@ -244,6 +244,7 @@ select.filter-select:focus, input.filter-input:focus { border-color: var(--blue)
 .kpi-value { font-size: 26px; font-weight: 700; line-height: 1.1; margin-top: 4px; }
 .kpi-sub   { font-size: 12px; color: var(--text-2); margin-top: 2px; }
 .kpi-icon  { position: absolute; right: 16px; top: 16px; font-size: 24px; opacity: .15; }
+.kpi-content { flex: 1; min-width: 0; }
 
 /* ─── Chart Grid ─── */
 .chart-grid {
@@ -624,12 +625,20 @@ tbody tr:last-child td { border-bottom: none; }
   .btn-label { display: none; }
 
   /* KPI Cards */
-  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .kpi-card { padding: 12px 14px; min-width: 0; overflow: hidden; }
-  .kpi-value { font-size: 20px; }
-  .kpi-label { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi-sub   { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .kpi-icon  { font-size: 18px; }
+  .kpi-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+  .kpi-card {
+    padding: 20px 20px 16px;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+  }
+  .kpi-card::before { height: 100%; width: 5px; top: 0; left: 0; border-radius: var(--radius) 0 0 var(--radius); }
+  .kpi-icon { position: static; font-size: 36px; opacity: 0.85; flex-shrink: 0; }
+  .kpi-value { font-size: 34px; font-weight: 800; line-height: 1; margin-top: 2px; }
+  .kpi-label { font-size: 13px; font-weight: 600; letter-spacing: .05em; }
+  .kpi-sub   { font-size: 13px; margin-top: 5px; white-space: normal; line-height: 1.5; }
 
   /* Charts */
   .chart-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
@@ -1795,11 +1804,13 @@ function renderKPIsPorProduto() {
     const cls     = clsMap[tipo] || 'blue';
     return `<div class="kpi-card ${cls}" style="position:relative">
       <span class="kpi-icon">${icons[tipo]||'📦'}</span>
-      <div class="kpi-label">${tipo}</div>
-      <div class="kpi-value" style="font-size:36px;font-weight:800">${qtd}</div>
-      <div class="kpi-sub">negócio${qtd!==1?'s':''} · ${pctQtd}% do total</div>
-      <div class="kpi-sub" style="margin-top:3px">Receita: <strong>${fmt(receita)}</strong></div>
-      <div class="kpi-sub">Ticket médio: ${fmt(ticket)}</div>
+      <div class="kpi-content">
+        <div class="kpi-label">${tipo}</div>
+        <div class="kpi-value" style="font-size:36px;font-weight:800">${qtd}</div>
+        <div class="kpi-sub">negócio${qtd!==1?'s':''} · ${pctQtd}% do total</div>
+        <div class="kpi-sub" style="margin-top:3px">Receita: <strong>${fmt(receita)}</strong></div>
+        <div class="kpi-sub">Ticket médio: ${fmt(ticket)}</div>
+      </div>
     </div>`;
   });
 
@@ -1807,14 +1818,17 @@ function renderKPIsPorProduto() {
   const totalTicket = totalQtd ? totalRec/totalQtd : 0;
   const totalCard = `<div class="kpi-card purple">
     <span class="kpi-icon">📊</span>
-    <div class="kpi-label">Total Geral</div>
-    <div class="kpi-value" style="font-size:36px;font-weight:800">${totalQtd}</div>
-    <div class="kpi-sub">negócios no período</div>
-    <div class="kpi-sub" style="margin-top:3px">Receita: <strong>${fmt(totalRec)}</strong></div>
-    <div class="kpi-sub">Ticket médio: ${fmt(totalTicket)}</div>
+    <div class="kpi-content">
+      <div class="kpi-label">Total Geral</div>
+      <div class="kpi-value" style="font-size:36px;font-weight:800">${totalQtd}</div>
+      <div class="kpi-sub">negócios no período</div>
+      <div class="kpi-sub" style="margin-top:3px">Receita: <strong>${fmt(totalRec)}</strong></div>
+      <div class="kpi-sub">Ticket médio: ${fmt(totalTicket)}</div>
+    </div>
   </div>`;
 
-  grid.style.gridTemplateColumns = `repeat(${tipos.length + 1}, 1fr)`;
+  const isMobile = window.innerWidth <= 768;
+  grid.style.gridTemplateColumns = isMobile ? '1fr' : `repeat(${tipos.length + 1}, 1fr)`;
   grid.innerHTML = prodCards.join('') + totalCard;
 }
 
