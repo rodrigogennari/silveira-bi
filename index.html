@@ -1790,7 +1790,7 @@ function renderKPIsPorProduto() {
   if (!tipos.length) { grid.innerHTML = ''; return; }
 
   const clsMap  = { 'DIN':'blue', 'Consultoria':'green', 'Mentoria':'orange' };
-  const icons   = { 'DIN':'🌾',   'Consultoria':'📋',    'Mentoria':'🎓' };
+  const icons   = { 'DIN':'🗂️',   'Consultoria':'📋',    'Mentoria':'🎓' };
   const totalQtd = data.length;
   const totalRec = data.reduce((s,r) => s+r.valor, 0);
 
