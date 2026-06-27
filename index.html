@@ -538,6 +538,39 @@ tbody tr:last-child td { border-bottom: none; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-2); }
 
+/* ─── Mobile Bottom Nav ─── */
+#mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--sidebar);
+  border-top: 1px solid rgba(255,255,255,.1);
+  z-index: 300;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mnav-items {
+  display: flex;
+  justify-content: space-around;
+}
+.mnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  cursor: pointer;
+  color: rgba(255,255,255,.45);
+  font-size: 10px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s;
+}
+.mnav-item .micon { font-size: 19px; line-height: 1; }
+.mnav-item.active { color: var(--blue); }
+
 /* ─── Responsive ─── */
 @media (max-width: 1200px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -554,6 +587,109 @@ tbody tr:last-child td { border-bottom: none; }
   #sidebar .version { display: none; }
   #sidebar .nav-item { justify-content: center; padding: 12px; }
   .meta-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  body { overflow-x: hidden; overflow-y: auto; height: auto; min-height: 100vh; width: 100%; }
+
+  #sidebar { display: none; }
+  #mobile-nav { display: block; }
+
+  #main { height: auto; min-height: 100vh; padding-bottom: 62px; overflow: visible; width: 100%; }
+  #content { flex: none; overflow-x: hidden; overflow-y: visible; padding: 12px 12px 8px; width: 100%; }
+
+  /* Topbar */
+  #topbar {
+    height: auto;
+    min-height: 52px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-title { font-size: 14px; font-weight: 700; }
+  .filters-row {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .filters-row::-webkit-scrollbar { display: none; }
+  select.filter-select, input.filter-input { font-size: 12px; padding: 4px 8px; flex-shrink: 0; }
+  .btn { padding: 6px 10px; font-size: 12px; gap: 4px; }
+  .btn-label { display: none; }
+
+  /* KPI Cards */
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .kpi-card { padding: 12px 14px; min-width: 0; overflow: hidden; }
+  .kpi-value { font-size: 20px; }
+  .kpi-label { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-sub   { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kpi-icon  { font-size: 18px; }
+
+  /* Charts */
+  .chart-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+  .chart-card { padding: 14px 12px; }
+  .chart-wrap { height: 190px; }
+  .chart-title { font-size: 12.5px; margin-bottom: 10px; }
+
+  /* Filter pills */
+  .filter-pills-bar {
+    padding: 8px 10px;
+    gap: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 12px;
+  }
+  .filter-pills-bar::-webkit-scrollbar { display: none; }
+  .pill-divider { height: 16px; flex-shrink: 0; }
+
+  /* Dashboard product grid */
+  #prod-cards-grid { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Tables */
+  .table-card { padding: 12px 10px; margin-bottom: 12px; overflow: hidden; }
+  .table-wrap, .table-card > div:has(table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 480px; font-size: 12px; }
+  thead th { padding: 7px 10px; font-size: 10.5px; }
+  tbody td  { padding: 7px 10px; }
+  .table-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+
+  /* Section headers */
+  .section-header { margin-bottom: 12px; }
+  .section-header h2 { font-size: 16px; }
+
+  /* Metas */
+  .meta-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+
+  /* Config */
+  .config-section { padding: 16px; }
+  .config-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .config-input { width: 100% !important; }
+  .config-section h3 { font-size: 13px; }
+
+  /* Funnel */
+  .funnel-stage { grid-template-columns: 70px 1fr 44px 44px; font-size: 11.5px; }
+
+  /* Toast */
+  #toast-container { bottom: 70px; right: 10px; left: 10px; align-items: center; }
+  .toast { min-width: unset; width: 100%; justify-content: center; }
+
+  /* Drop zone */
+  .drop-zone { padding: 24px 16px; }
+  .drop-zone .dz-icon { font-size: 28px; }
+}
+
+@media (max-width: 420px) {
+  .kpi-value { font-size: 17px; }
+  .kpi-grid  { gap: 6px; }
+  .chart-wrap { height: 170px; }
 }
 
 /* Section header */
@@ -702,11 +838,11 @@ tbody tr:last-child td { border-bottom: none; }
     </div>
 
     <div style="display:flex;gap:8px;align-items:center">
-      <label class="btn btn-primary" for="upload-input" style="cursor:pointer">
-        ⬆ Importar planilha
+      <label class="btn btn-primary" id="btn-import" for="upload-input" style="cursor:pointer">
+        ⬆ <span class="btn-label">Importar planilha</span>
       </label>
       <input type="file" id="upload-input" accept=".xlsx,.xls,.csv" />
-      <button class="btn btn-outline" id="btn-export">⬇ Exportar</button>
+      <button class="btn btn-outline" id="btn-export">⬇ <span class="btn-label">Exportar</span></button>
       <button class="theme-toggle" id="theme-toggle" title="Alternar tema">🌙</button>
     </div>
   </header>
@@ -1110,6 +1246,27 @@ tbody tr:last-child td { border-bottom: none; }
 <!-- Toast container -->
 <div id="toast-container"></div>
 
+<!-- Mobile bottom navigation -->
+<nav id="mobile-nav">
+  <div class="mnav-items">
+    <button class="mnav-item active" data-page="dashboard" onclick="mobileNav(this)">
+      <span class="micon">📊</span><span>Dashboard</span>
+    </button>
+    <button class="mnav-item" data-page="vendas" onclick="mobileNav(this)">
+      <span class="micon">💼</span><span>Vendas</span>
+    </button>
+    <button class="mnav-item" data-page="clientes" onclick="mobileNav(this)">
+      <span class="micon">🏢</span><span>Clientes</span>
+    </button>
+    <button class="mnav-item" data-page="metas" onclick="mobileNav(this)">
+      <span class="micon">🎯</span><span>Metas</span>
+    </button>
+    <button class="mnav-item" data-page="config" onclick="mobileNav(this)">
+      <span class="micon">⚙️</span><span>Config</span>
+    </button>
+  </div>
+</nav>
+
 <!-- Meta modal (simple) -->
 <div id="meta-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center">
   <div style="background:var(--surface);border-radius:var(--radius);padding:28px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.2)">
@@ -1222,15 +1379,7 @@ function initMetas() {
    NAVIGATION
 ════════════════════════════════════════════ */
 document.querySelectorAll('.nav-item').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    const page = el.dataset.page;
-    document.getElementById('page-' + page).classList.add('active');
-    document.getElementById('page-title').textContent = el.querySelector('span:last-child').textContent;
-    renderPage(page);
-  });
+  el.addEventListener('click', () => navigateTo(el.dataset.page));
 });
 
 function renderPage(page) {
@@ -1244,6 +1393,28 @@ function renderPage(page) {
     case 'funil':       renderFunil(); break;
     case 'config':      renderConfig(); break;
   }
+  // Scroll to top on page change (mobile)
+  document.getElementById('content').scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+function navigateTo(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mnav-item').forEach(n => n.classList.remove('active'));
+  const navItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navItem) {
+    navItem.classList.add('active');
+    document.getElementById('page-title').textContent = navItem.querySelector('span:last-child').textContent;
+  }
+  const mnavItem = document.querySelector(`.mnav-item[data-page="${page}"]`);
+  if (mnavItem) mnavItem.classList.add('active');
+  document.getElementById('page-' + page).classList.add('active');
+  renderPage(page);
+}
+
+function mobileNav(el) {
+  navigateTo(el.dataset.page);
 }
 
 /* ════════════════════════════════════════════
@@ -2317,6 +2488,16 @@ function showToast(msg, type='info') {
 /* ════════════════════════════════════════════
    INIT
 ════════════════════════════════════════════ */
+// Wrap static tables for mobile horizontal scroll
+document.querySelectorAll('.table-card table, .chart-card table').forEach(t => {
+  if (!t.parentElement.classList.contains('table-scroll')) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'overflow-x:auto;-webkit-overflow-scrolling:touch;';
+    t.parentNode.insertBefore(wrap, t);
+    wrap.appendChild(t);
+  }
+});
+
 initMetas();
 renderDashboard();
 // Carregar dados do GitHub automaticamente
